@@ -17,10 +17,11 @@ import { restrictToParentElement } from '@dnd-kit/modifiers';
 import FormElementCard from './FormElementCard';
 import { KeyboardSensor, PointerSensor } from '../../lib/dndKitSensors';
 import { ScrollArea } from '../ui/ScrollArea';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFormPlaygroundStore } from '../../stores/formPlaygroundStore';
 
 import '../../styles/formPlayGround.css'; // Import external CSS
+import FormPreview from './FormPreview';
 
 interface Props {
   isDropped: boolean;
@@ -51,33 +52,53 @@ export default function FormPlayground({
     setTimeout(() => resetIsDropped(), 500);
   }
 
+  // Dynamic column state (default: 1 column)
+  const [columns, setColumns] = useState(1);
+
   return (
-    <DndContext
-      sensors={sensors}
-      modifiers={[restrictToParentElement]}
-      onDragEnd={handleDragEnd}
-      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-      collisionDetection={closestCenter}
-    >
-      <SortableContext items={formElements} strategy={verticalListSortingStrategy}>
-        <section ref={setNodeRef} className={`dropzone ${isOver ? 'dropzone-active' : ''}`}>
-          {formElements.length === 0 ? (
-            <p className={`drop-message ${isOver ? 'drop-message-active' : ''}`}>
-              {isOver ? 'Drop the element here ...' : 'Drag an element from the right to this area'}
-            </p>
-          ) : (
-            <ScrollArea className={isUpdate ? 'scroll-area-update' : 'scroll-area'}>
-              <div className="form-elements-container">
-                {formElements.map(element => (
-                  <FormElementCard key={element.id} formElement={element} />
-                ))}
-              </div>
-              <div ref={cardsEndRef} />
-            </ScrollArea>
-          )}
-        </section>
-      </SortableContext>
-    </DndContext>
+    <div>
+      <div className="layout-controls">
+        <label>Columns:</label>
+        <select
+          value={columns}
+          onChange={e => setColumns(Number(e.target.value))}
+          className="column-selector"
+        >
+          <option value={1}>1 Column</option>
+          <option value={2}>2 Columns</option>
+          <option value={3}>3 Columns</option>
+          <option value={4}>4 Columns</option>
+        </select>
+      </div>
+
+      <DndContext
+        sensors={sensors}
+        modifiers={[restrictToParentElement]}
+        onDragEnd={handleDragEnd}
+        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+        collisionDetection={closestCenter}
+      >
+        <SortableContext items={formElements} strategy={verticalListSortingStrategy}>
+          <section ref={setNodeRef} className={`dropzone ${isOver ? 'dropzone-active' : ''}`}>
+            {formElements.length === 0 ? (
+              <p className={`drop-message ${isOver ? 'drop-message-active' : ''}`}>
+                {isOver ? 'Drop the element here ...' : 'Drag an element from the right to this area'}
+              </p>
+            ) : (
+              <ScrollArea className={isUpdate ? 'scroll-area-update' : 'scroll-area'}>
+                <div className={`form-elements-container grid-${columns}`}>
+                  {formElements.map(element => (
+                    <FormElementCard key={element.id} formElement={element} />
+                  ))}
+                </div>
+                <div ref={cardsEndRef} />
+              </ScrollArea>
+            )}
+          </section>
+        </SortableContext>
+      </DndContext>
+
+    </div>
   );
 
   function handleDragEnd({ active, over }: DragEndEvent) {

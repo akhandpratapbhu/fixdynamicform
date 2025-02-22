@@ -1,9 +1,15 @@
 import { useFormPlaygroundStore } from '../../stores/formPlaygroundStore';
 import FormElementCard from './FormElementCard';
 import { ScrollArea } from '../ui/ScrollArea';
+import '../../styles/formPlayGround.css'; // Ensure you include the same CSS file
 
-export default function FormPreview() {
+interface Props {
+  columns: number; // Accept columns as a prop
+}
+
+export default function FormPreview({ columns }: Props) {
   const formElements = useFormPlaygroundStore(state => state.formElements);
+console.log("col",columns);
 
   return (
     <section className="flex-grow rounded-lg border-2 border-dashed border-slate-300 bg-muted">
@@ -13,7 +19,7 @@ export default function FormPreview() {
         </p>
       ) : (
         <ScrollArea className="h-[calc(100vh-212px)]">
-          <ul className="space-y-5 p-5">
+          <ul className={`form-elements-container grid-${columns} p-5`}>
             {formElements.map(element => (
               <li key={element.id}>
                 <FormElementCard formElement={element} isView />
