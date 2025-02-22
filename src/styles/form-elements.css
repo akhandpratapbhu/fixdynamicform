@@ -1,0 +1,60 @@
+/* Styling for the article container */
+.article-container {
+    padding: 12px; /* p-3 */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* shadow-md */
+    transition: all 0.3s ease-in-out; /* transition-all duration-300 */
+  }
+  
+  .article-container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* hover:shadow-lg */
+  }
+  
+  /* Styling for the article title */
+  .article-title {
+    font-size: 14px; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #0b6bf2; /* text-gray-600 */
+    margin-bottom: 8px; /* mb-2 */
+  }
+  
+  /* Styling for the unordered list */
+  .article-list {
+    display:grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns per row */
+    gap: 8px; /* Adjust spacing between items */
+    list-style: none; /* Remove default bullet points */
+    padding: 0; /* Remove default padding */
+  }
+ 
+  
+  /* Styling for the sidebar container */
+  .sidebar-container {
+    position: relative;
+    width: 320px; /* w-80 */
+  }
+  
+  /* Sticky header */
+  .sidebar-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+    padding-bottom: 5px;
+  }
+  
+  /* Form elements section */
+  .elements-section {
+    display: flex;
+    flex-wrap: wrap; /* Ensure items wrap properly */
+    gap: 16px; /* Spacing between elements */
+  }
+  
+  /* Centered message */
+  .no-results {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4f5154; /* text-muted-foreground */
+  }
+  

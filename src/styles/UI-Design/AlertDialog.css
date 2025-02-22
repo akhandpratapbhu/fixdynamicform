@@ -1,0 +1,82 @@
+/* Overlay */
+.alert-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+  }
+  
+  /* Dialog Content */
+  .alert-dialog-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  }
+  
+  /* Header */
+  .alert-dialog-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  /* Footer */
+  .alert-dialog-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  /* Title */
+  .alert-dialog-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  /* Description */
+  .alert-dialog-description {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  /* Action Button */
+  .alert-dialog-action {
+    padding: 8px 16px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .alert-dialog-action:hover {
+    background-color: #c9302c;
+  }
+  
+  /* Cancel Button */
+  .alert-dialog-cancel {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .alert-dialog-cancel:hover {
+    background-color: #e9ecef;
+  }
+  

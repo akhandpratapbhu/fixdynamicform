@@ -29,6 +29,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/RadioGroup';
 import { Combobox } from '../ui/Combobox';
 import type { ControllerRenderProps, FieldValues } from 'react-hook-form';
 import { FormElementsType } from '../form-validation-type';
+import '../../styles/formElementCard.css'; // Import external CSS file
 
 const animateLayoutChanges: AnimateLayoutChanges = args => {
   const { isSorting, wasDragging } = args;
@@ -72,215 +73,80 @@ export default function FormElementCard({
 
   return (
     <article
-      className={`relative flex gap-2 rounded-md bg-white py-3 shadow ${
-        isDragging ? 'z-10' : ''
-      } ${isView ? 'px-5' : 'pl-2 pr-4'}`}
+      className={`form-element-card ${isDragging ? 'dragging' : ''} ${
+        isView ? 'view-mode' : 'edit-mode'
+      }`}
       ref={setNodeRef}
       style={cardStyle}
     >
-      {isView ? null : (
-        <div
-          className={`flex cursor-move items-center rounded px-2 ${
-            isDragging ? 'bg-muted' : 'hover:bg-muted'
-          }`}
-          {...listeners}
-          {...attributes}
-        >
-          <GripVerticalIcon className="h-7 w-7 text-muted-foreground transition-colors duration-200" />
+      {!isView && (
+        <div className="drag-handle" {...listeners} {...attributes}>
+          <GripVerticalIcon className="drag-icon" />
         </div>
       )}
-      <div
-        className={`flex-grow space-y-2 ${
-          ['heading', 'description', 'checkbox', 'switch'].includes(DataType)
-            ? ''
-            : 'pb-2'
-        }`}
-      >
-        <div className="flex items-center gap-8">
-          <div className="flex w-full items-center gap-5">
+
+      <div className="form-content">
+        <div className="form-header">
+          <div className="form-label">
             {DataType === 'switch' ? (
-              <Switch
-                checked={field?.value}
-                onCheckedChange={field?.onChange}
-              />
+              <Switch checked={field?.value} onCheckedChange={field?.onChange} />
             ) : DataType === 'checkbox' ? (
-              <Checkbox
-                checked={field?.value}
-                onCheckedChange={field?.onChange}
-              />
+              <Checkbox checked={field?.value} onCheckedChange={field?.onChange} />
             ) : null}
+
             <BubbleMenuEditor
-              placeholder={
-                ['heading', 'description'].includes(DataType)
-                  ? label
-                  : 'Question or Text'
-              }
+              placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
               content={label}
-              updateHandler={(html: string) => {
-                updateLabel(id, html);
-              }}
+              updateHandler={(html: string) => updateLabel(id, html)}
               readOnly={isView}
             />
           </div>
-          {isView ? null : (
-            <div className="flex items-center">
-              {['heading', 'description', 'switch', 'checkbox'].includes(
-                DataType,
-              ) ? null : (
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id={'required-' + id}
-                    checked={isRequired}
-                    onCheckedChange={() => toggleRequired(id)}
-                  />
-                  <Label
-                    className="cursor-pointer font-normal"
-                    htmlFor={'required-' + id}
-                  >
+
+          {!isView && (
+            <div className="form-controls">
+              {!['heading', 'description', 'switch', 'checkbox'].includes(DataType) && (
+                <div className="required-toggle">
+                  <Switch id={'required-' + id} checked={isRequired} onCheckedChange={() => toggleRequired(id)} />
+                  <Label className="required-label" htmlFor={'required-' + id}>
                     Required
                   </Label>
                 </div>
               )}
-              <Separator orientation="vertical" className="mx-4 h-7" />
+
+              <Separator className="separator" />
               <Tooltip asChild title="Delete">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-destructive/5"
-                  onClick={() => {
-                    removeFormElement(id);
-                  }}
-                >
-                  <Trash2Icon className="h-5 w-5 text-destructive" />
+                <Button type="button" variant="ghost" size="icon" className="delete-button" onClick={() => removeFormElement(id)}>
+                  <Trash2Icon className="delete-icon" />
                 </Button>
               </Tooltip>
             </div>
           )}
         </div>
+
+        {/* Field Type Rendering */}
         {DataType === 'single-line' ? (
-          <Input
-            type="string"
-            placeholder="Single line text"
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Input type="text" placeholder="Single line text" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'number' ? (
-          <Input
-            type="number"
-            placeholder="Number"
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Input type="number" placeholder="Number" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'multi-line' ? (
-          <Textarea
-            placeholder="Multi line text..."
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Textarea placeholder="Multi line text..." required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'rich-text' ? (
           <RichTextEditor field={field} />
-        ) : ['checklist', 'multi-choice', 'dropdown', 'combobox'].includes(
-          DataType,
-          ) && !isView ? (
+        ) : ['checklist', 'multi-choice', 'dropdown', 'combobox'].includes(DataType) && !isView ? (
           <Options type={DataType} id={id} />
-        ) : DataType === 'checklist' ? (
-          <ul className="space-y-3">
-            {options?.map(({ label, value }) => (
-              <li key={value} className="flex items-center gap-3">
-                <Checkbox
-                  id={value}
-                  checked={field?.value?.includes(label) ?? false}
-                  onCheckedChange={checked => {
-                    if (checked) field?.onChange([...field.value, label]);
-                    else
-                      field?.onChange(
-                        field.value.filter((val: string) => val !== label),
-                      );
-                  }}
-                />
-                <Label
-                  htmlFor={value}
-                  className="flex h-5 items-center font-normal"
-                >
-                  {label}
-                </Label>
-              </li>
-            ))}
-          </ul>
-        ) : DataType === 'multi-choice' ? (
-          <RadioGroup
-            className="gap-3"
-            value={field?.value}
-            onValueChange={field?.onChange}
-          >
-            {options?.map(({ label, value }) => (
-              <div key={value} className="flex items-center space-x-3">
-                <RadioGroupItem value={value} id={value} />
-                <Label
-                  htmlFor={value}
-                  className="flex h-5 items-center font-normal"
-                >
-                  {label}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        ) : DataType === 'dropdown' ? (
-          <Select
-            value={field?.value}
-            onValueChange={field?.onChange}
-            required={field ? isRequired : false}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select an option..." />
-            </SelectTrigger>
-            <SelectContent>
-              {options?.map(({ label, value }) => (
-                <SelectItem value={value} key={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : DataType === 'combobox' && options ? (
-          <Combobox options={options} field={field} />
         ) : DataType === 'date' ? (
           <DatePicker field={field} />
         ) : DataType === 'date-range' ? (
           <DateRangePicker field={field} />
         ) : DataType === 'time' ? (
-          <Input
-            type="time"
-            className="w-32"
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Input type="time" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'attachments' ? (
-          <Input
-            type="file"
-            className="pt-1.5 text-muted-foreground"
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Input type="file" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'image' ? (
-          <Input
-            type="file"
-            accept="image/*"
-            className="pt-1.5 text-muted-foreground"
-            required={field ? isRequired : false}
-            value={field?.value ?? ''}
-            onChange={field?.onChange}
-          />
+          <Input type="file" accept="image/*" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : null}
-        {isView && isRequired ? (
-          <div className="pt-1 text-sm text-destructive">* Required</div>
-        ) : null}
+
+        {isView && isRequired && <div className="required-message">* Required</div>}
       </div>
     </article>
   );

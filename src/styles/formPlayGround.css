@@ -1,0 +1,41 @@
+.dropzone {
+    flex-grow: 1;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background-color: rgba(240, 240, 240, 0.25);
+    transition: border-color 0.3s ease;
+  }
+  
+  .dropzone-active {
+    border-color: #333;
+  }
+  
+  .drop-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-weight: 500;
+    color: #888;
+    transition: color 0.3s ease;
+  }
+  
+  .drop-message-active {
+    color: #555;
+  }
+  
+  .scroll-area {
+    height: calc(100vh - 212px);
+  }
+  
+  .scroll-area-update {
+    height: calc(100vh - 247px);
+  }
+  
+  .form-elements-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  

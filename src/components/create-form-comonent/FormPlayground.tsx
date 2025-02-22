@@ -20,6 +20,8 @@ import { ScrollArea } from '../ui/ScrollArea';
 import { useRef } from 'react';
 import { useFormPlaygroundStore } from '../../stores/formPlaygroundStore';
 
+import '../../styles/formPlayGround.css'; // Import external CSS
+
 interface Props {
   isDropped: boolean;
   resetIsDropped: () => void;
@@ -32,13 +34,9 @@ export default function FormPlayground({
   isUpdate = false,
 }: Props) {
   const formElements = useFormPlaygroundStore(state => state.formElements);
-  const moveFormElement = useFormPlaygroundStore(
-    state => state.moveFormElement,
-  );
+  const moveFormElement = useFormPlaygroundStore(state => state.moveFormElement);
 
-  const { setNodeRef, isOver } = useDroppable({
-    id: 'droppable',
-  });
+  const { setNodeRef, isOver } = useDroppable({ id: 'droppable' });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -50,9 +48,7 @@ export default function FormPlayground({
   const cardsEndRef = useRef<HTMLDivElement>(null);
   if (cardsEndRef.current && isDropped) {
     cardsEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => {
-      resetIsDropped();
-    }, 500);
+    setTimeout(() => resetIsDropped(), 500);
   }
 
   return (
@@ -63,33 +59,15 @@ export default function FormPlayground({
       measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       collisionDetection={closestCenter}
     >
-      <SortableContext
-        items={formElements}
-        strategy={verticalListSortingStrategy}
-      >
-        <section
-          ref={setNodeRef}
-          className={`flex-grow rounded-lg border-2 border-dashed bg-muted/25 ${
-            isOver ? 'border-muted-foreground' : 'border-slate-300'
-          }`}
-        >
+      <SortableContext items={formElements} strategy={verticalListSortingStrategy}>
+        <section ref={setNodeRef} className={`dropzone ${isOver ? 'dropzone-active' : ''}`}>
           {formElements.length === 0 ? (
-            <p
-              className={`flex h-full items-center justify-center font-medium ${
-                isOver ? 'text-slate-700' : 'text-muted-foreground'
-              }`}
-            >
-              {isOver
-                ? 'Drop the element here ...'
-                : 'Drag a element from the right to this area'}
+            <p className={`drop-message ${isOver ? 'drop-message-active' : ''}`}>
+              {isOver ? 'Drop the element here ...' : 'Drag an element from the right to this area'}
             </p>
           ) : (
-            <ScrollArea
-              className={
-                isUpdate ? 'h-[calc(100vh-247px)]' : 'h-[calc(100vh-212px)]'
-              }
-            >
-              <div className="space-y-5 py-5 pl-5 pr-5">
+            <ScrollArea className={isUpdate ? 'scroll-area-update' : 'scroll-area'}>
+              <div className="form-elements-container">
                 {formElements.map(element => (
                   <FormElementCard key={element.id} formElement={element} />
                 ))}

@@ -25,6 +25,7 @@ import {
 import { ScrollArea } from '../ui/ScrollArea';
 import SearchInput from '../shared/SearchInput';
 import DraggableButton from './DraggableButton';
+import   "../../styles/form-elements.css";
 
 const elementGroups = [
   {
@@ -139,9 +140,9 @@ export default function FormElements({ isUpdate }: Props) {
 
     if (filteredElements.length > 0)
       return (
-        <article key={i}>
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-          <ul className="mt-3 grid grid-cols-2 gap-4" >
+        <article key={title} className="article-container">
+          <h3 className="article-title">{title}</h3>
+          <ul className="article-list">
             {filteredElements.map(({ text, Icon }, i) => (
               <DraggableButton text={text} Icon={Icon} key={i} />
             ))}
@@ -149,34 +150,33 @@ export default function FormElements({ isUpdate }: Props) {
         </article>
       );
     else return null;
-  });
-
-  return (
-    <ScrollArea
-      className={`${
-        isUpdate ? 'h-[calc(100vh-139px)]' : 'h-[calc(100vh-104px)]'
-      } shrink-0 pr-[26px]`}
-    >
-      <aside className="relative w-80">
-        <section className="sticky top-0 z-10 space-y-5 bg-white pb-5">
-          <div className="space-y-1">
-            <h1 className="text-lg font-semibold">Form Elements</h1>
-            <h2 className="text-sm text-muted-foreground">
-              Drag elements to the right
-            </h2>
-          </div>
-          <SearchInput placeholder="Search Elements" />
-        </section>
-        <section className="flex flex-col gap-6" >
-          {filteredElementGroups.every(element => element === null) ? (
-            <p className="text-center text-sm font-medium text-muted-foreground">
-              No results found
-            </p>
-          ) : (
-            filteredElementGroups
-          )}
-        </section>
-      </aside>
-    </ScrollArea>
-  );
+    });
+    
+    return (
+      <ScrollArea
+        className={`${
+          isUpdate ? 'h-[calc(100vh-139px)]' : 'h-[calc(100vh-104px)]'
+        } shrink-0 pr-[26px]`}
+      >
+        <aside className="sidebar-container">
+          <section className="sidebar-header space-y-5">
+            <div className="space-y-1">
+              <h4 className="text-lg font-semibold">Form Element</h4>
+              <h6 className="text-sm text-muted-foreground">
+                Drag elements to the right
+              </h6>
+            </div>
+            <SearchInput placeholder="Search Elements" />
+          </section>
+          <section className="elements-section">
+            {filteredElementGroups.every(element => element === null) ? (
+              <p className="no-results">No results found</p>
+            ) : (
+              filteredElementGroups
+            )}
+          </section>
+        </aside>
+      </ScrollArea>
+    );
+    
 }

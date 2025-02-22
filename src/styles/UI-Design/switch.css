@@ -1,0 +1,50 @@
+.switch-root {
+    display: inline-flex;
+    align-items: center;
+    width: 36px;
+    height: 20px;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    position: relative;
+  }
+  
+  .switch-root:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #4a90e2, 0 0 0 4px rgba(74, 144, 226, 0.5);
+  }
+  
+  .switch-root[data-state='checked'] {
+    background-color: #4a90e2;
+  }
+  
+  .switch-root[data-state='unchecked'] {
+    background-color: #ccc;
+  }
+  
+  .switch-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+    position: absolute;
+    left: 2px;
+  }
+  
+  .switch-root[data-state='checked'] .switch-thumb {
+    transform: translateX(16px);
+  }
+  
+  .switch-root[data-state='unchecked'] .switch-thumb {
+    transform: translateX(0);
+  }
+  
+  .switch-root:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  
