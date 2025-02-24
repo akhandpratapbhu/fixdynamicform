@@ -149,7 +149,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
               </section>
     
               {/* Form Body */}
-              {isPreview ? <FormPreview /> : <FormPlayground isDropped={isDropped} resetIsDropped={() => setIsDropped(false)} isUpdate={formType === "edit"} />}
+              {isPreview ? <FormPreview columns={0} /> : <FormPlayground isDropped={isDropped} resetIsDropped={() => setIsDropped(false)} isUpdate={formType === "edit"} />}
     
               {/* Form Footer */}
               <section className="form-footer">
@@ -180,7 +180,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
         </div>
       </div>
     
-      <DragOverlay modifiers={[restrictToWindowEdges]}>{activeButton ? <FormElementButton className="cursor-grabbing" {...activeButton} /> : null}</DragOverlay>
+      <DragOverlay modifiers={[restrictToWindowEdges]}>{activeButton ? <FormElementButton  {...activeButton} /> : null}</DragOverlay>
     </DndContext>
     
   );
