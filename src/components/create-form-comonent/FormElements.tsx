@@ -39,6 +39,10 @@ const elementGroups = [
         text: 'Description',
         Icon: PencilLineIcon,
       },
+      {
+        text: 'Column',
+        Icon: PencilLineIcon,
+      },
     ],
   },
   {

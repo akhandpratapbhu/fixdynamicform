@@ -149,7 +149,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
               </section>
     
               {/* Form Body */}
-              {isPreview ? <FormPreview /> : <FormPlayground isDropped={isDropped} resetIsDropped={() => setIsDropped(false)} isUpdate={formType === "edit"} />}
+              {isPreview ? <FormPreview columns={0} /> : <FormPlayground isDropped={isDropped} resetIsDropped={() => setIsDropped(false)} isUpdate={formType === "edit"} />}
     
               {/* Form Footer */}
               <section className="form-footer">

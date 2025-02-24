@@ -38,7 +38,7 @@ export const useFormPlaygroundStore = createWithEqualityFn(
         produce((draft: FormPlaygroundStoreType) => {
           draft.formElements.push({
             id: uuid(),
-            label,           
+            label,
             DataType,
             isRequired: false,
             options: [
@@ -48,10 +48,14 @@ export const useFormPlaygroundStore = createWithEqualityFn(
               'combobox',
             ].includes(DataType)
               ? [
-                  { label: 'Option 1', value: uuid() },
-                  { label: 'Option 2', value: uuid() },
-                ]
+                { label: 'Option 1', value: uuid() },
+                { label: 'Option 2', value: uuid() },
+              ]
               : undefined,
+            children: undefined,
+            rightItems: [],
+            leftItems: [],
+            items: []
           });
           console.log("addformelemw",label, DataType,name)
 
