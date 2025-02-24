@@ -180,7 +180,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
         </div>
       </div>
     
-      <DragOverlay modifiers={[restrictToWindowEdges]}>{activeButton ? <FormElementButton {...activeButton} /> : null}</DragOverlay>
+      <DragOverlay modifiers={[restrictToWindowEdges]}>{activeButton ? <FormElementButton  {...activeButton} /> : null}</DragOverlay>
     </DndContext>
     
   );
