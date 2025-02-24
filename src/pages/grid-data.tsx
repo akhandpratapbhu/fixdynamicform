@@ -15,8 +15,12 @@ import {
   Checkbox,
   Menu,
   MenuItem,
+  Popover,
+  InputAdornment,
+  FormControlLabel,
 } from "@mui/material";
-import { Search, KeyboardArrowDown, FilterList } from "@mui/icons-material";
+import { Search, KeyboardArrowDown, FilterList, TableRows, FileDownload } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 interface JobData {
   jobId: string;
@@ -85,11 +89,20 @@ const initialColumns: Column[] = [
 ];
 
 const JobCardTable: React.FC = () => {
+  const navigate = useNavigate();
+
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [selected, setSelected] = useState<string[]>([]);
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+
+  // Menu states
+  const [manageColumnsAnchor, setManageColumnsAnchor] = useState<HTMLButtonElement | null>(null);
+  const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null);
+  const [searchTermsColumnWise, setSearchTermsColumnWise] = useState({ jobId: "", customerName: "", carModel: "" });
+
 
   const handleSelectAllClick = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -142,79 +155,255 @@ const JobCardTable: React.FC = () => {
     setPage(0);
   };
 
+  function handleSearchColumnWise(id: string, e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
-    <Box sx={{ width: "100%", p: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6">Job Card Reports</Typography>
-        <TextField
-          size="small"
-          placeholder="Search"
-          onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <Search sx={{ mr: 1, color: "gray" }} />
-            ),
+    <>
+      <div>
+        <button onClick={() => navigate("/create-form")} style={{ color: "white",backgroundColor:"green", right:"20px"}}>Add Form</button>
+      </div>
+      <Box sx={{ width: "100%", p: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 2,
+            alignItems: "center",
           }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 500 }}>
+              Job Card Reports
+            </Typography>
+            <TextField
+              size="small"
+              placeholder="Search"
+              sx={{
+                bgcolor: "grey.50",
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "grey.300",
+                  },
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={handleSearch}
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              endIcon={<KeyboardArrowDown />}
+              startIcon={<TableRows />}
+              sx={{
+                bgcolor: "grey.50",
+                textTransform: "none",
+                color: "text.primary",
+              }}
+              onClick={(e) => setManageColumnsAnchor(e.currentTarget)}
+            >
+              Manage Columns
+            </Button>
+
+            <Menu
+              anchorEl={manageColumnsAnchor}
+              open={Boolean(manageColumnsAnchor)}
+              onClose={() => setManageColumnsAnchor(null)}
+              PaperProps={{
+                sx: { maxHeight: 300, width: 200 },
+              }}
+            >
+              {columns.map((column) => (
+                <MenuItem key={column.id} dense>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={column.visible}
+                        onChange={() => handleColumnVisibilityChange(column.id)}
+                        size="small"
+                      />
+                    }
+                    label={column.label}
+                  />
+                </MenuItem>
+              ))}
+            </Menu>
+
+            <Button
+              variant="outlined"
+              size="small"
+              endIcon={<KeyboardArrowDown />}
+              sx={{
+                bgcolor: "grey.50",
+                textTransform: "none",
+                color: "text.primary",
+              }}
+            >
+              Default View
+            </Button>
+
+            <Button
+              variant="outlined"
+              size="small"
+              endIcon={<KeyboardArrowDown />}
+              startIcon={<FilterList />}
+              sx={{
+                bgcolor: "grey.50",
+                textTransform: "none",
+                color: "text.primary",
+              }}
+              onClick={(e) => setFilterAnchor(e.currentTarget)}
+            >
+              Filter
+            </Button>
+
+            <Popover
+              open={Boolean(filterAnchor)}
+              anchorEl={filterAnchor}
+              onClose={() => setFilterAnchor(null)}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              PaperProps={{
+                sx: { p: 2, width: 650 },
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                filter Columns-wise
+              </Typography>
+              {columns.map((column) => (
+                <MenuItem key={column.id} dense>
+                  <TextField
+                    placeholder={`Search ${column.label}`}
+                    variant="outlined"
+                    size="small"
+                    value={searchTermsColumnWise[column.id as keyof typeof searchTermsColumnWise]}
+                    onChange={(e) => handleSearchColumnWise(column.id, e)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    fullWidth
+                  />
+                </MenuItem>
+              ))}
+            </Popover>
+
+            <Button
+              variant="outlined"
+              size="small"
+              endIcon={<KeyboardArrowDown />}
+              startIcon={<FileDownload />}
+              sx={{
+                bgcolor: "grey.50",
+                textTransform: "none",
+                color: "text.primary",
+              }}
+            >
+              Export
+            </Button>
+          </Box>
+        </Box>
+
+        <TableContainer
+          component={Paper}
+          sx={{ maxHeight: "calc(100vh - 180px)" }}
+        >
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox" sx={{ bgcolor: "grey.50" }}>
+                  <Checkbox
+                    indeterminate={
+                      selected.length > 0 && selected.length < filteredData.length
+                    }
+                    checked={
+                      filteredData.length > 0 && selected.length === filteredData.length
+                    }
+                    onChange={handleSelectAllClick}
+                  />
+                </TableCell>
+                {columns
+                  .filter((col) => col.visible)
+                  .map((column) => (
+                    <TableCell
+                      key={column.id}
+                      sx={{
+                        bgcolor: "grey.50",
+                        fontWeight: 500,
+                        color: "text.secondary",
+                      }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => {
+                  const isItemSelected = isSelected(row.jobId);
+
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.jobId)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.jobId}
+                      selected={isItemSelected}
+                      sx={{
+                        bgcolor: index % 2 === 0 ? "white" : "grey.50",
+                        "&:hover": {
+                          bgcolor: "action.hover",
+                        },
+                      }}
+                    >
+                      <TableCell padding="checkbox">
+                        <Checkbox checked={isItemSelected} />
+                      </TableCell>
+                      {columns
+                        .filter((col) => col.visible)
+                        .map((column) => (
+                          <TableCell key={column.id}>{row[column.id]}</TableCell>
+                        ))}
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TablePagination
+          component="div"
+          count={filteredData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Box>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  onChange={handleSelectAllClick}
-                  checked={selected.length === mockData.length}
-                />
-              </TableCell>
-              {columns.map(
-                (column) =>
-                  column.visible && (
-                    <TableCell key={column.id}>{column.label}</TableCell>
-                  )
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                const isItemSelected = isSelected(row.jobId);
-                return (
-                  <TableRow
-                    key={row.jobId}
-                    onClick={(event) => handleClick(event, row.jobId)}
-                    selected={isItemSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox checked={isItemSelected} />
-                    </TableCell>
-                    {columns.map(
-                      (column) =>
-                        column.visible && (
-                          <TableCell key={column.id}>
-                            {row[column.id]}
-                          </TableCell>
-                        )
-                    )}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredData.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </Box>
+    </>
   );
 };
 
