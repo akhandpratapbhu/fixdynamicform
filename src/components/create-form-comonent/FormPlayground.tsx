@@ -72,47 +72,9 @@ export default function FormPlayground({
           ) : (
             <ScrollArea className={isUpdate ? 'scroll-area-update' : 'scroll-area'}>
               {/* Render Default Form Elements */}
-              {formElements
-                .filter(element => element.DataType !== 'column')
-                .map(element => (
-                  <FormElementCard key={element.id} formElement={element} />
-                ))}
-
-              {/* Flex Container for Columns */}
-              <div className="column-container">
-                {formElements
-                  .filter((element) => element.DataType === "column") // ✅ Type assertion
-                  .map((column) => (
-                    <div key={column.id} className="column-wrapper">
-                      <p className="column-title">Column {column.id}</p>
-
-                      {/* Left Column Drop Zone */}
-                      <SortableContext items={column.leftItems} strategy={verticalListSortingStrategy}>
-                        <section ref={setNodeRef} className="column-dropzone left-zone">
-                          <p className="drop-message">Left Column</p>
-                          {column.leftItems.length > 0 ? (
-                            column.leftItems.map((item) => <FormElementCard key={item} formElement={item} />)
-                          ) : (
-                            <p className="empty-column">Drop items here</p>
-                          )}
-                        </section>
-                      </SortableContext>
-
-                      {/* Right Column Drop Zone */}
-                      <SortableContext items={column.rightItems} strategy={verticalListSortingStrategy}>
-                        <section ref={setNodeRef} className="column-dropzone right-zone">
-                          <p className="drop-message">Right Column</p>
-                          {column.rightItems.length > 0 ? (
-                            column.rightItems.map((item) => <FormElementCard key={item} formElement={item} />)
-                          ) : (
-                            <p className="empty-column">Drop items here</p>
-                          )}
-                        </section>
-                      </SortableContext>
-                    </div>
-                  ))}
-              </div>
-
+              {formElements.map(element => (
+                <FormElementCard key={element.id} formElement={element} />
+              ))}
 
               <div ref={cardsEndRef} />
             </ScrollArea>
