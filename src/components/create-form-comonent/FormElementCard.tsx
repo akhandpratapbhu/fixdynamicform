@@ -30,6 +30,10 @@ import { Combobox } from '../ui/Combobox';
 import type { ControllerRenderProps, FieldValues } from 'react-hook-form';
 import { FormElementsType } from '../form-validation-type';
 import '../../styles/formElementCard.css'; // Import external CSS file
+import { useState } from 'react';
+import Modal from '@mui/material/Modal/Modal';
+import React from 'react';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 const animateLayoutChanges: AnimateLayoutChanges = args => {
   const { isSorting, wasDragging } = args;
@@ -55,7 +59,15 @@ export default function FormElementCard({
   );
   const toggleRequired = useFormPlaygroundStore(state => state.toggleRequired);
   const updateLabel = useFormPlaygroundStore(state => state.updateLabel);
+  const [open, setOpen] = React.useState(false);
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  }; 
   const {
     attributes,
     listeners,
@@ -126,7 +138,7 @@ export default function FormElementCard({
 
         {/* Field Type Rendering */}
         {DataType === 'single-line' ? (
-          <Input type="text" placeholder="Single line text" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
+          <Input type="text" placeholder="Single line text" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange}  onClick={handleClickOpen} />
         ) : DataType === 'number' ? (
           <Input type="number" placeholder="Number" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
         ) : DataType === 'multi-line' ? (
@@ -149,6 +161,38 @@ export default function FormElementCard({
 
         {isView && isRequired && <div className="required-message">* Required</div>}
       </div>
+
+      {/* Popup Modal */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Use Google's location service?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+          <div className="popup-content">
+              <Input type="text" placeholder="Field 1" />
+              <Input type="text" placeholder="Field 2" />
+              <Input type="text" placeholder="Field 3" />
+              <Input type="text" placeholder="Field 4" />
+              <Input type="text" placeholder="Field 5" />
+              <Input type="text" placeholder="Field 6" />
+
+            </div>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Disagree</Button>
+          <Button onClick={handleClose} autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
+     
     </article>
   );
 }

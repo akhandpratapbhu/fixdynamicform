@@ -72,11 +72,9 @@ export default function FormPlayground({
           ) : (
             <ScrollArea className={isUpdate ? 'scroll-area-update' : 'scroll-area'}>
               {/* Render Default Form Elements */}
-              {formElements
-                .filter(element => element.DataType !== 'column')
-                .map(element => (
-                  <FormElementCard key={element.id} formElement={element} />
-                ))}
+              {formElements.map(element => (
+                <FormElementCard key={element.id} formElement={element} />
+              ))}
 
               <div ref={cardsEndRef} />
             </ScrollArea>
