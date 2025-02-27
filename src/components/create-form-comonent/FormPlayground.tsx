@@ -83,12 +83,6 @@ export default function FormPlayground({
       </SortableContext>
     </DndContext>
 
-
-
-
-
-
-
   );
 
   function handleDragEnd({ active, over }: DragEndEvent) {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { SearchIcon, XIcon } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 
-import Input from '../ui/Input';
+import Input from '../ui/textfield';
 
 interface Props {
   placeholder: string;

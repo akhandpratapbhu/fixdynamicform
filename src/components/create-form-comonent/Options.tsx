@@ -2,7 +2,7 @@ import { CircleIcon, PlusIcon, XIcon } from 'lucide-react';
 import { shallow } from 'zustand/shallow';
 
 import { Checkbox } from '../ui/Checkbox';
-import Input from '../ui/Input';
+import Input from '../ui/textfield';
 import { Button } from '../ui/Button';
 import Tooltip from '../ui/Tooltip';
 import { useFormPlaygroundStore } from '../../stores/formPlaygroundStore';

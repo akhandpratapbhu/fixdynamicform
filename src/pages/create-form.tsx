@@ -9,9 +9,9 @@ import {
   FormElementButton,
   FormElementButtonProps,
 } from '../components/create-form-comonent/DraggableButton';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import FormPlayground from '../components/create-form-comonent/FormPlayground';
-import Input from '../components/ui/Input';
+import Input from '../components/ui/textfield';
 import { Button } from '../components/ui/Button';
 import { EyeIcon, HammerIcon, LockIcon } from 'lucide-react';
 import {
@@ -134,7 +134,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
               <section className="form-header">
                 <div className="form-name">
                   <label>Form Name:</label>
-                  <Input required placeholder="Enter form name" value={formName} onChange={(e) => setFormName(e.target.value)} />
+                  <Input required placeholder="Enter form name" value={formName} onChange={(e: { target: { value: SetStateAction<string>; }; }) => setFormName(e.target.value)} />
                 </div>
                 <div className="form-toggle">
                   <div className={`toggle-item ${isPreview ? "" : "text-primary"}`}>

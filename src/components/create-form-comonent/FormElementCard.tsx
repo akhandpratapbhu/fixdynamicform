@@ -5,7 +5,6 @@ import {
   defaultAnimateLayoutChanges,
 } from '@dnd-kit/sortable';
 import { Checkbox } from '../ui/Checkbox';
-import Input from '../ui/Input';
 import { Button } from '../ui/Button';
 import Tooltip from '../ui/Tooltip';
 import { Switch } from '../ui/Switch';
@@ -18,6 +17,8 @@ import { DatePicker } from '../shared/DatePicker';
 import { DateRangePicker } from '../shared/DateRangePicker';
 import Options from './Options';
 import { useFormPlaygroundStore } from '../../stores/formPlaygroundStore';
+import Textfield from '../ui/textfield';
+
 import {
   Select,
   SelectContent,
@@ -34,6 +35,8 @@ import { useState } from 'react';
 import Modal from '@mui/material/Modal/Modal';
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { setFormData } from "../../redux/formSlice";
 
 const animateLayoutChanges: AnimateLayoutChanges = args => {
   const { isSorting, wasDragging } = args;
@@ -53,6 +56,8 @@ export default function FormElementCard({
   isView = false,
   field,
 }: Props) {
+  const dispatch = useDispatch();
+
   const { id, label, DataType, isRequired, options } = formElement;
   const removeFormElement = useFormPlaygroundStore(
     state => state.removeFormElement,
@@ -60,7 +65,20 @@ export default function FormElementCard({
   const toggleRequired = useFormPlaygroundStore(state => state.toggleRequired);
   const updateLabel = useFormPlaygroundStore(state => state.updateLabel);
   const [open, setOpen] = React.useState(false);
+  const [formData, setFormDataState] = useState({
+    label: '',
+    placeholder: '',
+    name: '',
+    minlength: '',
+    maxlength: '',
+    column: '',
+    value:''
+  });
 
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+    setFormDataState({ ...formData, [e.target.name]: e.target.value });
+  };
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -68,6 +86,12 @@ export default function FormElementCard({
   const handleClose = () => {
     setOpen(false);
   }; 
+  const handleSave = () => {
+   // setFormData({ ...formData});
+    dispatch(setFormData(formData)); // Send data to Redux store
+    handleClose(); // Close the modal
+  };
+  
   const {
     attributes,
     listeners,
@@ -107,12 +131,12 @@ export default function FormElementCard({
               <Checkbox checked={field?.value} onCheckedChange={field?.onChange} />
             ) : null}
 
-            <BubbleMenuEditor
+            {/* <BubbleMenuEditor
               placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
               content={label}
               updateHandler={(html: string) => updateLabel(id, html)}
               readOnly={isView}
-            />
+            /> */}
           </div>
 
           {!isView && (
@@ -124,42 +148,15 @@ export default function FormElementCard({
                     Required
                   </Label>
                 </div>
-              )}
-
-              <Separator className="separator" />
-              <Tooltip asChild title="Delete">
-                <Button type="button" variant="ghost" size="icon" className="delete-button" onClick={() => removeFormElement(id)}>
-                  <Trash2Icon className="delete-icon" />
-                </Button>
-              </Tooltip>
+              )}            
             </div>
           )}
         </div>
+         {/* Field Type Rendering */}
+        {DataType === 'single-line' ? <Textfield type= "button" onClick={handleClickOpen}   /> : null}
 
-        {/* Field Type Rendering */}
-        {DataType === 'single-line' ? (
-          <Input type="text" placeholder="Single line text" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange}  onClick={handleClickOpen} />
-        ) : DataType === 'number' ? (
-          <Input type="number" placeholder="Number" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
-        ) : DataType === 'multi-line' ? (
-          <Textarea placeholder="Multi line text..." required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
-        ) : DataType === 'rich-text' ? (
-          <RichTextEditor field={field} />
-        ) : ['checklist', 'multi-choice', 'dropdown', 'combobox'].includes(DataType) && !isView ? (
-          <Options type={DataType} id={id} />
-        ) : DataType === 'date' ? (
-          <DatePicker field={field} />
-        ) : DataType === 'date-range' ? (
-          <DateRangePicker field={field} />
-        ) : DataType === 'time' ? (
-          <Input type="time" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
-        ) : DataType === 'attachments' ? (
-          <Input type="file" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
-        ) : DataType === 'image' ? (
-          <Input type="file" accept="image/*" required={isRequired} value={field?.value ?? ''} onChange={field?.onChange} />
-        ) : null}
+  
 
-        {isView && isRequired && <div className="required-message">* Required</div>}
       </div>
 
       {/* Popup Modal */}
@@ -170,26 +167,96 @@ export default function FormElementCard({
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Use Google's location service?"}
+          {"text field"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
           <div className="popup-content">
-              <Input type="text" placeholder="Field 1" />
-              <Input type="text" placeholder="Field 2" />
-              <Input type="text" placeholder="Field 3" />
-              <Input type="text" placeholder="Field 4" />
-              <Input type="text" placeholder="Field 5" />
-              <Input type="text" placeholder="Field 6" />
+          <p>input-type</p>
+          <input
+        type="text"
+        name="text"
+        placeholder="label line text"
+        value="text"
 
+      />
+          <p>Label</p>
+          <input
+        type="text"
+        name="label"
+        placeholder="label line text"
+        value={formData.label}
+        onChange={handleChange}
+
+      />
+      <p>name</p>
+          <input
+        type="text"
+        name="name"
+        placeholder="enter name of input field"
+        value={formData.name}
+        onChange={handleChange}
+        required
+
+      />
+      <p>Placeholder</p>
+      <input
+        type="text"
+        name="placeholder"
+        placeholder="enter placeholder name"
+        value={formData.placeholder}
+        onChange={handleChange}
+      />
+ <p>Min-Length</p>
+       <input
+        type="number"
+        name="minlength"
+        placeholder="enter min length"
+        value={formData.minlength}
+        onChange={handleChange}
+      />
+           <p>Max-Length</p>
+
+      <input
+        type="number"
+        name="maxlength"
+        placeholder="enter max length"
+        value={formData.maxlength}
+        onChange={handleChange}
+      />
+            <p>Container CSS Class</p>
+
+      <input
+        type="text"
+        name="column"
+        placeholder="enter column like- col-12"
+        value={formData.column}
+        onChange={handleChange}
+      />
+    
+    <div className="form-controls">
+              {!['heading', 'description', 'switch', 'checkbox'].includes(DataType) && (
+                <div className="required-toggle">
+                  <Switch id={'required-' + id} checked={isRequired} onCheckedChange={() => toggleRequired(id)} />
+                  <Label className="required-label" htmlFor={'required-' + id}>
+                    Required
+                  </Label>
+                </div>
+              )}            
+            </div>
             </div>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
-            Agree
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSave} autoFocus>
+            save
           </Button>
+          <Tooltip asChild title="Delete">
+                <Button type="button" variant="ghost" size="icon" className="delete-button" onClick={() => removeFormElement(id)}>
+                  <Trash2Icon className="delete-icon" />
+                </Button>
+              </Tooltip>
         </DialogActions>
       </Dialog>
      
