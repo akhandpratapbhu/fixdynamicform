@@ -18,10 +18,20 @@ import {
   Popover,
   InputAdornment,
   FormControlLabel,
+  TableSortLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  DialogActions,
 } from "@mui/material";
 import { Search, KeyboardArrowDown, FilterList, TableRows, FileDownload } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-
+import * as XLSX from "xlsx"; // Excel library
+import jsPDF from "jspdf"; // PDF library
 interface JobData {
   jobId: string;
   date: string;
@@ -96,12 +106,23 @@ const JobCardTable: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<string>("");
 
   // Menu states
   const [manageColumnsAnchor, setManageColumnsAnchor] = useState<HTMLButtonElement | null>(null);
   const [filterAnchor, setFilterAnchor] = useState<HTMLButtonElement | null>(null);
-  const [searchTermsColumnWise, setSearchTermsColumnWise] = useState({ jobId: "", customerName: "", carModel: "" });
+  const [searchTermsColumnWise, setSearchTermsColumnWise] = useState<Record<keyof JobData, string>>({
+    jobId: "",
+    date: "",
+    customerName: "",
+    carModel: "",
+    chassisNo: "",
+    serviceType: "",
+    technicianName: "",
+    defaultView: "",
+    serviceDescription: "",
+  });
 
 
   const handleSelectAllClick = (event: ChangeEvent<HTMLInputElement>) => {
@@ -117,11 +138,11 @@ const JobCardTable: React.FC = () => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  const filteredData = mockData.filter((item) =>
-    Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchTerm)
-    )
-  );
+  // const filteredData = mockData.filter((item) =>
+  //   Object.values(item).some((value) =>
+  //     String(value).toLowerCase().includes(searchTerm)
+  //   )
+  // );
 
   const handleClick = (event: MouseEvent<HTMLTableRowElement>, id: string) => {
     const selectedIndex = selected.indexOf(id);
@@ -155,14 +176,74 @@ const JobCardTable: React.FC = () => {
     setPage(0);
   };
 
-  function handleSearchColumnWise(id: string, e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
-    throw new Error("Function not implemented.");
-  }
+  const handleSearchColumnWise = (id: keyof JobData, e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setSearchTermsColumnWise((prev) => ({
+      ...prev,
+      [id]: e.target.value.toLowerCase(),
+    }));
+  };
 
+
+  const filteredData = mockData.filter((item) => {
+    // Global Search Logic
+    const isGlobalMatch = Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm)
+    );
+
+    // Column-Wise Search Logic
+    const isColumnMatch = Object.entries(searchTermsColumnWise).every(([key, term]) => {
+      if (!term) return true; // Skip filtering for empty search fields
+      return String(item[key as keyof JobData]).toLowerCase().includes(term);
+    });
+
+    return isGlobalMatch && isColumnMatch; // Both filters should match
+  });
+
+  const handleRequestSort = (columnId: string) => {
+    const isAsc = orderBy === columnId && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(columnId);
+  };
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (orderBy) {
+      const key = orderBy as keyof JobData; // ✅ Explicitly tell TypeScript it's a valid key
+
+      if (a[key] < b[key]) return order === "asc" ? -1 : 1;
+      if (a[key] > b[key]) return order === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+  const [open, setOpen] = useState(false);
+
+  // Function to export data as Excel
+  const exportAsExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData); // Convert JSON to worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    XLSX.writeFile(workbook, "export.xlsx");
+    setOpen(false); // Close dialog
+  };
+
+  // Function to export data as PDF
+  const exportAsPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Exported Data", 10, 10);
+
+    let y = 20;
+    filteredData.forEach((item, index) => {
+      doc.text(`${index + 1}. ${JSON.stringify(item)}`, 10, y);
+      y += 10;
+    });
+
+    doc.save("export.pdf");
+    setOpen(false); // Close dialog
+  };
   return (
     <>
       <div>
-        <button onClick={() => navigate("/create-form")} style={{ color: "white",backgroundColor:"green", right:"20px"}}>Add Form</button>
+        <button onClick={() => navigate("/create-form")} style={{ color: "white", backgroundColor: "green", right: "20px" }}>Add Form</button>
       </div>
       <Box sx={{ width: "100%", p: 2 }}>
         <Box
@@ -292,8 +373,8 @@ const JobCardTable: React.FC = () => {
                     placeholder={`Search ${column.label}`}
                     variant="outlined"
                     size="small"
-                    value={searchTermsColumnWise[column.id as keyof typeof searchTermsColumnWise]}
-                    onChange={(e) => handleSearchColumnWise(column.id, e)}
+                    value={searchTermsColumnWise[column.id]} // Bind input value
+                    onChange={(e) => handleSearchColumnWise(column.id, e)} // Handle change
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -305,94 +386,103 @@ const JobCardTable: React.FC = () => {
                   />
                 </MenuItem>
               ))}
+
             </Popover>
 
+            {/* Export Button */}
             <Button
               variant="outlined"
               size="small"
               endIcon={<KeyboardArrowDown />}
               startIcon={<FileDownload />}
-              sx={{
-                bgcolor: "grey.50",
-                textTransform: "none",
-                color: "text.primary",
-              }}
+              sx={{ bgcolor: "grey.50", textTransform: "none", color: "text.primary" }}
+              onClick={() => setOpen(true)}
             >
               Export
             </Button>
+
+            {/* Dialog Popup */}
+            <Dialog open={open} onClose={() => setOpen(false)}>
+              <DialogTitle>Select Export Format</DialogTitle>
+              <DialogContent>
+                <List>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={exportAsPDF}>
+                      <ListItemText primary="Export as PDF" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={exportAsExcel}>
+                      <ListItemText primary="Export as Excel" />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpen(false)} color="primary">Cancel</Button>
+              </DialogActions>
+            </Dialog>
           </Box>
         </Box>
 
-        <TableContainer
-          component={Paper}
-          sx={{ maxHeight: "calc(100vh - 180px)" }}
-        >
+        <TableContainer component={Paper} sx={{ maxHeight: "calc(100vh - 180px)" }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
                 <TableCell padding="checkbox" sx={{ bgcolor: "grey.50" }}>
                   <Checkbox
-                    indeterminate={
-                      selected.length > 0 && selected.length < filteredData.length
-                    }
-                    checked={
-                      filteredData.length > 0 && selected.length === filteredData.length
-                    }
+                    indeterminate={selected.length > 0 && selected.length < sortedData.length}
+                    checked={sortedData.length > 0 && selected.length === sortedData.length}
                     onChange={handleSelectAllClick}
                   />
                 </TableCell>
-                {columns
-                  .filter((col) => col.visible)
-                  .map((column) => (
-                    <TableCell
-                      key={column.id}
-                      sx={{
-                        bgcolor: "grey.50",
-                        fontWeight: 500,
-                        color: "text.secondary",
-                      }}
+                {columns.filter((col) => col.visible).map((column) => (
+                  <TableCell
+                    key={column.id}
+                    sx={{ bgcolor: "grey.50", fontWeight: 500, color: "text.secondary" }}
+                    sortDirection={orderBy === column.id ? order : false}
+                  >
+                    <TableSortLabel
+                      active={orderBy === column.id}
+                      direction={orderBy === column.id ? order : "asc"}
+                      onClick={() => handleRequestSort(column.id)}
                     >
                       {column.label}
-                    </TableCell>
-                  ))}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredData
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.jobId);
+              {sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
+                const isItemSelected = isSelected(row.jobId);
 
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.jobId)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.jobId}
-                      selected={isItemSelected}
-                      sx={{
-                        bgcolor: index % 2 === 0 ? "white" : "grey.50",
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                        },
-                      }}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox checked={isItemSelected} />
-                      </TableCell>
-                      {columns
-                        .filter((col) => col.visible)
-                        .map((column) => (
-                          <TableCell key={column.id}>{row[column.id]}</TableCell>
-                        ))}
-                    </TableRow>
-                  );
-                })}
+                return (
+                  <TableRow
+                    hover
+                    onClick={(event) => handleClick(event, row.jobId)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.jobId}
+                    selected={isItemSelected}
+                    sx={{
+                      bgcolor: index % 2 === 0 ? "white" : "grey.50",
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox checked={isItemSelected} />
+                    </TableCell>
+                    {columns.filter((col) => col.visible).map((column) => (
+                      <TableCell key={column.id}>{row[column.id]}</TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
-        </TableContainer>
+        </TableContainer>;
 
         <TablePagination
           component="div"
