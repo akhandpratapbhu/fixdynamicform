@@ -113,7 +113,7 @@ export default function CreateForm({ formType = 'add', form }: Props) {
       <div className="container">
         <div className="row">
           {/* Form Elements (4 Columns) */}
-          <div className="col-md-4">
+          <div className="col-md-4 element-container">
             <FormElements isUpdate={formType === "edit"} />
           </div>
     

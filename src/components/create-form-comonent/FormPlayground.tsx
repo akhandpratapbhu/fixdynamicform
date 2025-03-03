@@ -52,8 +52,14 @@ export default function FormPlayground({
     setTimeout(() => resetIsDropped(), 500);
   }
   useEffect(() => {
-    console.log("formelemnt", formElements)
-  })
+    if (formElements.length > 0) {
+      formElements.forEach((element) => {
+        console.log(element);
+        
+      });
+    }
+  },)
+  
 
   return (
     <DndContext
@@ -95,3 +101,7 @@ export default function FormPlayground({
     }
   }
 }
+function dispatch(arg0: { payload: any[]; type: "form/setFormData"; }) {
+  throw new Error('Function not implemented.');
+}
+

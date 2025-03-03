@@ -1,23 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface FormDataState {
-  value: string;
+  id: string;
   label: string;
-  name: string;
-  placeholder: string;
-  minlength: string;
-  maxlength: string;
-  column: string;
-}
+  DataType: string;
+  inputField:{label:string,name:string,placeholder:string,minlength:string,maxlength:string,className:string,value:string};
+  isRequired: boolean;
+  options?: { label: string; value: string }[];}
 
 const initialState: FormDataState = {
+  id:"",
   label: "",
-  name: "",
-  placeholder: "",
-  minlength: "",
-  maxlength: "",
-  column: "",
-  value:""
+  DataType: "",
+  inputField:{label:"",name:'',placeholder:'',minlength:'',maxlength:'',className:'',value:''},
+  isRequired: false,
 };
 
 const formSlice = createSlice({
@@ -25,6 +21,8 @@ const formSlice = createSlice({
   initialState,
   reducers: {
     setFormData: (state, action: PayloadAction<FormDataState>) => {
+      console.log({...state,...action.payload});
+      
       return { ...state, ...action.payload };
     },
   },

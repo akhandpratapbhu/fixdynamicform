@@ -11,6 +11,13 @@ interface FormPlaygroundStoreType {
   addFormElement: (label: string, DataType: string) => void;
   moveFormElement: (oldIndex: number, newIndex: number) => void;
   updateLabel: (id: string, label: string) => void;
+  updateName: (id: string, name: string) => void;
+  updatePlaceholder: (id: string, updatePlaceholder: string) => void;
+  updateMinlength: (id: string, updateMinlength: string) => void;  
+  updateMaxlength: (id: string, updateMaxlength: string) => void;
+  updateClassName: (id: string, updateClassName: string) => void;
+  updateValue: (id: string, updateValue: string) => void;
+
   toggleRequired: (id: string) => void;
   addOption: (id: string) => void;
   updateOption: (id: string, optionId: string, label: string) => void;
@@ -52,10 +59,15 @@ export const useFormPlaygroundStore = createWithEqualityFn(
                 { label: 'Option 2', value: uuid() },
               ]
               : undefined,
-            children: undefined,
-            rightItems: [],
-            leftItems: [],
-            items: []
+              inputField: {
+              label: '',
+              name: '',
+              placeholder: '',
+              minlength: '',
+              maxlength: '',
+              className: '',
+              value: ''
+            }
           });
           console.log("addformelemw",label, DataType,name)
 
@@ -85,20 +97,83 @@ export const useFormPlaygroundStore = createWithEqualityFn(
             console.log("updateLabel", label);
           }),
         ),
-     
-    // updateLabel: (id, label) =>
-    //   set(
-    //     produce((draft: FormPlaygroundStoreType) => {
-    //       draft.formElements.forEach(el => {
-    //         if (el.id === id) {
-    //           el.label = label;
-    //           return;
-    //         }
-    //       });
-    //       console.log("updateLabel",label,)
+        updateName: (id: any, name: string) =>
+          set(
+            produce((draft: FormPlaygroundStoreType) => {
+              draft.formElements.forEach(el => {
+                if (el.id === id) {
+                  el.inputField.name = name.replace(/<[^>]*>/g, ""); // Removes HTML tags
+                  return;
+                }
+              });
+              console.log("updateNameinplaygroundstore",name);
+            }),
+          ),
+          updatePlaceholder: (id, placeholder) =>
+      set(
+        produce((draft: FormPlaygroundStoreType) => {
+          draft.formElements.forEach(el => {
+            if (el.id === id) {
+              el.inputField.placeholder = placeholder.replace(/<[^>]*>/g, ""); // Removes HTML tags;
+              return;
+            }
+          });
+          console.log("updateplaceholder",placeholder,)
 
-    //     }),
-    //   ),
+        }),
+      ),
+      updateMinlength: (id, minlength) =>
+        set(
+          produce((draft: FormPlaygroundStoreType) => {
+            draft.formElements.forEach(el => {
+              if (el.id === id) {
+                el.inputField.minlength = minlength.replace(/<[^>]*>/g, ""); // Removes HTML tags;
+                return;
+              }
+            });
+            console.log("updateminlength",minlength)
+  
+          }),
+        ),
+        updateMaxlength: (id, maxlength) =>
+          set(
+            produce((draft: FormPlaygroundStoreType) => {
+              draft.formElements.forEach(el => {
+                if (el.id === id) {
+                  el.inputField.maxlength = maxlength.replace(/<[^>]*>/g, ""); // Removes HTML tags;
+                  return;
+                }
+              });
+              console.log("updatemaxlength",maxlength,)
+    
+            }),
+          ),
+          updateClassName: (id, className) =>
+            set(
+              produce((draft: FormPlaygroundStoreType) => {
+                draft.formElements.forEach(el => {
+                  if (el.id === id) {
+                    el.inputField.className = className.replace(/<[^>]*>/g, ""); // Removes HTML tags;
+                    return;
+                  }
+                });
+                console.log("updateclassname",className,)
+      
+              }),
+            ),
+            updateValue: (id, value) =>
+              set(
+                produce((draft: FormPlaygroundStoreType) => {
+                  draft.formElements.forEach(el => {
+                    if (el.id === id) {
+                      el.inputField.value= value.replace(/<[^>]*>/g, ""); // Removes HTML tags;
+                      return;
+                    }
+                  });
+                  console.log("updatevalue",value,)
+        
+                }),
+              ),
     toggleRequired: (id: any) =>
       set(
         produce((draft: FormPlaygroundStoreType) => {

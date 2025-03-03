@@ -58,40 +58,38 @@ export default function FormElementCard({
 }: Props) {
   const dispatch = useDispatch();
 
-  const { id, label, DataType, isRequired, options } = formElement;
+  const { id, label, DataType, inputField, isRequired, options } = formElement;
   const removeFormElement = useFormPlaygroundStore(
     state => state.removeFormElement,
   );
   const toggleRequired = useFormPlaygroundStore(state => state.toggleRequired);
   const updateLabel = useFormPlaygroundStore(state => state.updateLabel);
-  const [open, setOpen] = React.useState(false);
-  const [formData, setFormDataState] = useState({
-    label: '',
-    placeholder: '',
-    name: '',
-    minlength: '',
-    maxlength: '',
-    column: '',
-    value:''
-  });
+  const updateName = useFormPlaygroundStore(state => state.updateName);
+  const updatePlaceholder = useFormPlaygroundStore(state => state.updatePlaceholder);
+  const updateMinlength = useFormPlaygroundStore(state => state.updateMinlength);
+  const updateMaxlength = useFormPlaygroundStore(state => state.updateMaxlength);
+  const updateClassName = useFormPlaygroundStore(state => state.updateClassName);
+  const updateValue = useFormPlaygroundStore(state => state.updateValue);
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
-    setFormDataState({ ...formData, [e.target.name]: e.target.value });
-  };
-  
+  const [open, setOpen] = React.useState(false);
+
+
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-  }; 
+  };
+
+  const [data, setData] = React.useState(formElement);
+
   const handleSave = () => {
-   // setFormData({ ...formData});
-    dispatch(setFormData(formData)); // Send data to Redux store
+    setData(formElement)
+    // dispatch(setFormData(formElement)); // Send data to Redux store
     handleClose(); // Close the modal
   };
-  
+
   const {
     attributes,
     listeners,
@@ -107,12 +105,12 @@ export default function FormElementCard({
       : undefined,
     transition,
   };
+  console.log("formElement", formElement.label);
 
   return (
     <article
-      className={`form-element-card ${isDragging ? 'dragging' : ''} ${
-        isView ? 'view-mode' : 'edit-mode'
-      }`}
+      className={`form-element-card ${isDragging ? 'dragging' : ''} ${isView ? 'view-mode' : 'edit-mode'
+        }`}
       ref={setNodeRef}
       style={cardStyle}
     >
@@ -148,14 +146,143 @@ export default function FormElementCard({
                     Required
                   </Label>
                 </div>
-              )}            
+              )}
             </div>
           )}
         </div>
-         {/* Field Type Rendering */}
-        {DataType === 'single-line' ? <Textfield type= "button" onClick={handleClickOpen}   /> : null}
-
-  
+        (<input type="button" style={{ width: "100px" }} onClick={handleClickOpen} />)
+        {/* Field Type Rendering */}
+        {/* {DataType === 'single-line' ? (
+          <Input
+            type="string"
+            placeholder="Single line text"
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) */}
+        {DataType === 'single-line' ? (
+          <Textfield 
+          value={formElement?.inputField.value || ""} 
+          placeholder={formElement?.inputField.placeholder || "Enter text"} 
+          label={formElement?.label || "Text Field"} 
+          className={formElement?.inputField.className || ""}
+        />
+        ) : DataType === 'number' ? (
+          <Textfield
+            type="button"
+            placeholder="Number"
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) : DataType === 'multi-line' ? (
+          <Textarea
+            placeholder="Multi line text..."
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) : DataType === 'rich-text' ? (
+          <RichTextEditor field={field} />
+        ) : ['checklist', 'multi-choice', 'dropdown', 'combobox'].includes(
+          DataType,
+        ) && !isView ? (
+          <Options type={DataType} id={id} />
+        ) : DataType === 'checklist' ? (
+          <ul className="space-y-3">
+            {options?.map(({ label, value }) => (
+              <li key={value} className="flex items-center gap-3">
+                <Checkbox
+                  id={value}
+                  checked={field?.value?.includes(label) ?? false}
+                  onCheckedChange={checked => {
+                    if (checked) field?.onChange([...field.value, label]);
+                    else
+                      field?.onChange(
+                        field.value.filter((val: string) => val !== label),
+                      );
+                  }}
+                />
+                <Label
+                  htmlFor={value}
+                  className="flex h-5 items-center font-normal"
+                >
+                  {label}
+                </Label>
+              </li>
+            ))}
+          </ul>
+        ) : DataType === 'multi-choice' ? (
+          <RadioGroup
+            className="gap-3"
+            value={field?.value}
+            onValueChange={field?.onChange}
+          >
+            {options?.map(({ label, value }) => (
+              <div key={value} className="flex items-center space-x-3">
+                <RadioGroupItem value={value} id={value} />
+                <Label
+                  htmlFor={value}
+                  className="flex h-5 items-center font-normal"
+                >
+                  {label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        ) : DataType === 'dropdown' ? (
+          <Select
+            value={field?.value}
+            onValueChange={field?.onChange}
+            required={field ? isRequired : false}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select an option..." />
+            </SelectTrigger>
+            <SelectContent>
+              {options?.map(({ label, value }) => (
+                <SelectItem value={value} key={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : DataType === 'combobox' && options ? (
+          <Combobox options={options} field={field} />
+        ) : DataType === 'date' ? (
+          <DatePicker field={field} />
+        ) : DataType === 'date-range' ? (
+          <DateRangePicker field={field} />
+        ) : DataType === 'time' ? (
+          <Textfield
+            type="time"
+            className="w-32"
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) : DataType === 'attachments' ? (
+          <Textfield
+            type="file"
+            className="pt-1.5 text-muted-foreground"
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) : DataType === 'image' ? (
+          <Textfield
+            type="file"
+            accept="image/*"
+            className="pt-1.5 text-muted-foreground"
+            required={field ? isRequired : false}
+            value={field?.value ?? ''}
+            onChange={field?.onChange}
+          />
+        ) : null}
+        {isView && isRequired ? (
+          <div className="pt-1 text-sm text-destructive">* Required</div>
+        ) : null}
 
       </div>
 
@@ -171,79 +298,60 @@ export default function FormElementCard({
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-          <div className="popup-content">
-          <p>input-type</p>
-          <input
-        type="text"
-        name="text"
-        placeholder="label line text"
-        value="text"
+            <div className="popup-content">
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content='label'
+                updateHandler={(label: string) => updateLabel(id, label)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content="name"
+                updateHandler={(name: string) => updateName(id, name)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content="Placeholder"
+                updateHandler={(Placeholder: string) => updatePlaceholder(id, Placeholder)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content='minlength'
+                updateHandler={(minlength: string) => updateMinlength(id, minlength)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content='maxlength'
+                updateHandler={(maxlength: string) => updateMaxlength(id, maxlength)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content='className'
+                updateHandler={(className: string) => updateClassName(id, className)}
+                readOnly={isView}
+              />
+              <BubbleMenuEditor
+                placeholder={['heading', 'description'].includes(DataType) ? label : 'Question or Text'}
+                content='value'
+                updateHandler={(value: string) => updateValue(id, value)}
+                readOnly={isView}
+              />
 
-      />
-          <p>Label</p>
-          <input
-        type="text"
-        name="label"
-        placeholder="label line text"
-        value={formData.label}
-        onChange={handleChange}
-
-      />
-      <p>name</p>
-          <input
-        type="text"
-        name="name"
-        placeholder="enter name of input field"
-        value={formData.name}
-        onChange={handleChange}
-        required
-
-      />
-      <p>Placeholder</p>
-      <input
-        type="text"
-        name="placeholder"
-        placeholder="enter placeholder name"
-        value={formData.placeholder}
-        onChange={handleChange}
-      />
- <p>Min-Length</p>
-       <input
-        type="number"
-        name="minlength"
-        placeholder="enter min length"
-        value={formData.minlength}
-        onChange={handleChange}
-      />
-           <p>Max-Length</p>
-
-      <input
-        type="number"
-        name="maxlength"
-        placeholder="enter max length"
-        value={formData.maxlength}
-        onChange={handleChange}
-      />
-            <p>Container CSS Class</p>
-
-      <input
-        type="text"
-        name="column"
-        placeholder="enter column like- col-12"
-        value={formData.column}
-        onChange={handleChange}
-      />
-    
-    <div className="form-controls">
-              {!['heading', 'description', 'switch', 'checkbox'].includes(DataType) && (
-                <div className="required-toggle">
-                  <Switch id={'required-' + id} checked={isRequired} onCheckedChange={() => toggleRequired(id)} />
-                  <Label className="required-label" htmlFor={'required-' + id}>
-                    Required
-                  </Label>
-                </div>
-              )}            
-            </div>
+              <div className="form-controls">
+                {!['heading', 'description', 'switch', 'checkbox'].includes(DataType) && (
+                  <div className="required-toggle">
+                    <Switch id={'required-' + id} checked={isRequired} onCheckedChange={() => toggleRequired(id)} />
+                    <Label className="required-label" htmlFor={'required-' + id}>
+                      Required
+                    </Label>
+                  </div>
+                )}
+              </div>
             </div>
           </DialogContentText>
         </DialogContent>
@@ -253,13 +361,13 @@ export default function FormElementCard({
             save
           </Button>
           <Tooltip asChild title="Delete">
-                <Button type="button" variant="ghost" size="icon" className="delete-button" onClick={() => removeFormElement(id)}>
-                  <Trash2Icon className="delete-icon" />
-                </Button>
-              </Tooltip>
+            <Button type="button" variant="ghost" size="icon" className="delete-button" onClick={() => removeFormElement(id)}>
+              <Trash2Icon className="delete-icon" />
+            </Button>
+          </Tooltip>
         </DialogActions>
       </Dialog>
-     
+
     </article>
   );
 }
